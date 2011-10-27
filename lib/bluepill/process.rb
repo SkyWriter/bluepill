@@ -284,6 +284,7 @@ module Bluepill
     end
 
     def stop_process
+      assasinate_children!
       if stop_command
         cmd = self.prepare_command(stop_command)
         logger.warning "Executing stop command: #{cmd}"
@@ -331,6 +332,7 @@ module Bluepill
     end
 
     def restart_process
+      assasinate_children!
       if restart_command
         cmd = self.prepare_command(restart_command)
 
@@ -443,6 +445,13 @@ module Bluepill
 
         child = self.child_process_factory.create_child_process(name, child_pid, logger)
         @children << child
+      end
+    end
+    
+    def assasinate_children!
+      if self.monitor_children?
+        refresh_children!
+        children.each {|child| child.stop_process}
       end
     end
 
